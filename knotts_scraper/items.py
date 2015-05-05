@@ -8,12 +8,13 @@
 import scrapy
 
 
-class KnottsScraperItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
-
 class ShowtimeItem(scrapy.Item):
 	name = scrapy.Field()
 	datetime = scrapy.Field()
 	location = scrapy.Field()
+
+
+class ParkHours(scrapy.Item):
+	date = scrapy.Field()
+	open_time = scrapy.Field()
+	close_time = scrapy.Field()
