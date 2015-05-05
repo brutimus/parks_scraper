@@ -3,7 +3,7 @@ import forecastio
 import json
 import petl
 
-from private import FORECAST_IO_API_KEY
+from private import FORECAST_IO_API_KEY, KNOTTS_SPREADSHEET_KEY
 
 KNOTTS_LAT = 33.844317
 KNOTTS_LNG = -118.000227
@@ -19,8 +19,8 @@ def main():
     park_hours = petl.fromjson('../data/parkhours.json')
     show_times = petl.fromjson('../data/showtimes.json')
     knotts_spreadsheet = petl.fromcsv(
-        'https://spreadsheets.google.com/tq?key=1_wmXgh1zuljwzH2O1eW_BTBkxDkxyckLzSD9cT4Kn2Q&gid=0&tqx=out:csv'
-        )
+        'https://spreadsheets.google.com/tq?key=%s&gid=0&tqx=out:csv' % KNOTTS_SPREADSHEET_KEY
+    )
     forecast = get_forecast()
 
     spreadsheet_lookup = {}
