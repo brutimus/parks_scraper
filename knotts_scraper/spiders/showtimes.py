@@ -81,9 +81,7 @@ class ShowtimesSpider(scrapy.Spider):
             and x.strip() or (x.strip() + ' p.m.') for x in times]
         times = map(lambda x:du_parse(x).time(), times)
         self.log('Processed times: %s' % times)
-        datetimes = map(lambda x:datetime.datetime.combine(*x), itertools.product(dates, times))
-        self.log(str(datetimes))
-        return datetimes
+        return ((x, times) for x in dates)
 
 
     def parse(self, response):
@@ -101,7 +99,11 @@ class ShowtimesSpider(scrapy.Spider):
                     if re.match(r'^\d.+', line_item):
                         datetimes = self.process_datetimes(line_item, date_choices)
                         for dt in datetimes:
-                            yield ShowtimeItem(name=name, datetime=dt, location=location_cache)
+                            yield ShowtimeItem(
+                                name=name,
+                                date=dt[0],
+                                times=dt[1],
+                                location=location_cache)
                     elif line_item.startswith('Loc'):
                         line_item = line_item.replace('Location:', '').strip()
                         location_cache = line_item

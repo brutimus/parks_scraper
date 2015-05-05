@@ -10,7 +10,8 @@ import scrapy
 
 class ShowtimeItem(scrapy.Item):
 	name = scrapy.Field()
-	datetime = scrapy.Field()
+	date = scrapy.Field()
+	times = scrapy.Field()
 	location = scrapy.Field()
 
 
