@@ -16,4 +16,6 @@ This is a Python Scrapy project to build a daily schedule for Knott's Berry Farm
     scrapy crawl showtimes -o data/showtimes.json
     scrapy crawl parkhours -o data/parkhours.json
     cd utils/
-    python merge_datasets.py 
+    python merge_datasets.py
+
+Note: Add FORECAST_IO_API_KEY and KNOTTS_SPREADSHEET_KEY to private.py before running the merge_datasets.py script
