@@ -2,8 +2,19 @@
 import forecastio
 import json
 import petl
+import tinys3
+import shutil
+from StringIO import StringIO
 
-from private import FORECAST_IO_API_KEY, KNOTTS_SPREADSHEET_KEY
+from private import (
+    FORECAST_IO_API_KEY,
+    KNOTTS_SPREADSHEET_KEY,
+    S3_ACCESS_KEY,
+    S3_SECRET_KEY,
+    S3_BUCKET,
+    S3_ENDPOINT
+)
+
 
 KNOTTS_LAT = 33.844317
 KNOTTS_LNG = -118.000227
@@ -13,6 +24,19 @@ def get_forecast():
     forecast = forecastio.load_forecast(
         FORECAST_IO_API_KEY, KNOTTS_LAT, KNOTTS_LNG)
     return {x.time.strftime('%Y-%m-%d'):x for x in forecast.daily().data}
+
+
+def save(f, filename):
+    conn = tinys3.Connection(
+        S3_ACCESS_KEY,
+        S3_SECRET_KEY,
+        endpoint=S3_ENDPOINT)
+    f.seek(0)
+    conn.upload('knotts/%s' % filename, f, S3_BUCKET)
+    f.seek(0)
+    with open('../data/%s' % filename, 'w+') as fo:
+        shutil.copyfileobj(f, fo)
+    f.seek(0)
 
 
 def main():
@@ -55,8 +79,10 @@ def main():
             day['temperatureMin'] = forecast_item.temperatureMin
             day['weatherIcon'] = forecast_item.icon
         new_park_hours.append(day)
-    with open('../data/merged_data.json', 'w+') as f:
-        json.dump(new_park_hours, f)
+
+    f = StringIO()
+    json.dump(new_park_hours, f)
+    save(f, 'merged_data.json')
 
 
 if __name__ == '__main__':
