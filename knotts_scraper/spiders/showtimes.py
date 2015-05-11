@@ -77,8 +77,9 @@ class ShowtimesSpider(scrapy.Spider):
             dates = [x for x in date_choices if x is not None]
         self.log('Processed dates: %s' % dates)
         times = re.split('[,;&]', times)
-        times = [(x.strip().endswith('m.') or x.strip().endswith('m'))
-            and x.strip() or (x.strip() + ' p.m.') for x in times]
+        times = map(unicode.strip, times)
+        times = [(x.endswith('m.') or x.endswith('m'))
+            and x or (x + ' p.m.') for x in times if x]
         times = map(lambda x:du_parse(x).time(), times)
         self.log('Processed times: %s' % times)
         return ((x, times) for x in dates)

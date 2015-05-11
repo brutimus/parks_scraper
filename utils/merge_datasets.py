@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from dateutil.parser import parse as du_parse
 import forecastio
-import json
+import pickle
 import petl
 import tinys3
 import shutil
@@ -39,9 +40,20 @@ def save(f, filename):
     f.seek(0)
 
 
+def load_pickles(filename):
+    buff = []
+    with open(filename, 'rb') as f:
+        while True:
+            try:
+                buff.append(pickle.load(f))
+            except EOFError, e:
+                break
+    return buff
+
+
 def main():
-    park_hours = petl.fromjson('../data/parkhours.json')
-    show_times = petl.fromjson('../data/showtimes.json')
+    park_hours = load_pickles('../data/parkhours.pickle')
+    show_times = load_pickles('../data/showtimes.pickle')
     knotts_spreadsheet = petl.fromcsv(
         'https://spreadsheets.google.com/tq?key=%s&gid=0&tqx=out:csv' % KNOTTS_SPREADSHEET_KEY
     )
@@ -49,13 +61,13 @@ def main():
 
     spreadsheet_lookup = {}
     for item in knotts_spreadsheet.dicts():
-        spreadsheet_lookup[item['date']] = {
+        spreadsheet_lookup[du_parse(item['date']).date()] = {
             'crowd_level': item['crowd_level'],
             'closures': map(unicode.strip, item['closures'].split(','))
         }
 
     show_times_lookup = {}
-    for item in show_times.dicts():
+    for item in show_times:
         show_times_lookup[item['date']] = show_times_lookup.get(
             item['date'], []) + [{
                 'name': item['name'],
@@ -63,7 +75,7 @@ def main():
                 'location': item['location']}]
 
     new_park_hours = []
-    for day in park_hours.dicts():
+    for day in park_hours:
 
         st = show_times_lookup.get(day['date'])
         if st:
@@ -81,8 +93,8 @@ def main():
         new_park_hours.append(day)
 
     f = StringIO()
-    json.dump(new_park_hours, f)
-    save(f, 'merged_data.json')
+    pickle.dump(new_park_hours, f)
+    save(f, 'merged_data.pickle')
 
 
 if __name__ == '__main__':
