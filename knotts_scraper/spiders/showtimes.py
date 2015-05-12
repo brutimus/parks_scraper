@@ -3,6 +3,7 @@ import datetime
 import itertools
 import re
 import scrapy
+import string
 from daterangeparser import parse as dr_parse
 from dateutil.parser import parse as du_parse
 
@@ -54,7 +55,7 @@ class ShowtimesSpider(scrapy.Spider):
         
         dates = []
 
-        for segment in re.split('[,;&]', string):
+        for segment in re.split('(?:[,;&]|and)', string):
             segment = segment.strip()
             if len(segment) == 1:
                 index = int(segment)
@@ -91,7 +92,9 @@ class ShowtimesSpider(scrapy.Spider):
             date_choices = self.process_date_choices(
                 block.css('.faq').xpath('text()').extract()[0].strip())
             for event_cell in block.css('table tbody tr td p'):
-                name = event_cell.xpath('strong/text() | b/text()').extract()[0].strip().title()
+                name = string.capwords(
+                    event_cell.xpath(
+                        'strong/text() | b/text()').extract()[0].strip())
                 self.log(name)
                 location_cache = None
                 # Reverse so we can cache the location first
