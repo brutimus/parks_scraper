@@ -53,6 +53,7 @@ def load_pickles(filename):
 
 def main():
     park_hours = load_pickles('../data/parkhours.pickle')
+    soak_city_hours = load_pickles('../data/soakcityhours.pickle')
     show_times = load_pickles('../data/showtimes.pickle')
     knotts_spreadsheet = petl.fromcsv(
         'https://spreadsheets.google.com/tq?key=%s&gid=0&tqx=out:csv' % 
@@ -88,12 +89,23 @@ def main():
                 'times': item['times']}]
                 # 'location': item['location']}] # We don't use loc, ignore
 
+    soak_city_hours_lookup = {}
+    for item in soak_city_hours:
+        soak_city_hours_lookup[item['date']] = {
+            'open_time': item['open_time'],
+            'close_time': item['close_time']
+        }
+
     new_park_hours = []
     for day in park_hours:
 
         st = show_times_lookup.get(day['date'])
         if st:
             day['show_times'] = sorted(st, key=lambda x:x['name'])
+
+        ss = soak_city_hours_lookup.get(day['date'])
+        if ss:
+            day['soak_city_hours'] = ss
 
         sheet_item = spreadsheet_lookup.get(day['date'])
         if sheet_item:

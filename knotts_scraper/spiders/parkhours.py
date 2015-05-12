@@ -6,16 +6,12 @@ from dateutil.parser import parse as du_parse
 from knotts_scraper.items import ParkHours
 
 
-class ParkhoursSpider(scrapy.Spider):
-    name = "parkhours"
+class KnottsParkhoursSpider(scrapy.Spider):
+    name = "knottshours"
     allowed_domains = ["knotts.com"]
     start_urls = (
         'https://www.knotts.com/hours-directions/park-hours',
     )
-
-    def parse_hours(self, string):
-        pass
-
 
     def parse(self, response):
         for month in response.css('.calendar'):
@@ -35,3 +31,11 @@ class ParkhoursSpider(scrapy.Spider):
                     date=start_date.date(),
                     open_time=start_date.time(),
                     close_time=end_date.time())
+
+
+class SoakcityParkhoursSpider(KnottsParkhoursSpider):
+    name = "soakcityhours"
+    allowed_domains = ["soakcityoc.com"]
+    start_urls = (
+        'https://www.soakcityoc.com/hours-directions/park-hours',
+    )
