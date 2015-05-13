@@ -16,7 +16,11 @@ NEWSPIDER_MODULE = 'knotts_scraper.spiders'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'knotts_scraper (+http://www.yourdomain.com)'
 
-FEED_URI = 's3://dev.seanstoops.com/knotts/%(name)s.json'
+FEED_URI = 's3://dev.seanstoops.com/knotts/%(name)s.pickle'
+
+
+# The following fixes a bug where boto fails to load buckets with dots
+# https://github.com/boto/boto/issues/2836#issuecomment-68682573
 
 import ssl
 
