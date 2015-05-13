@@ -17,6 +17,7 @@ NEWSPIDER_MODULE = 'knotts_scraper.spiders'
 #USER_AGENT = 'knotts_scraper (+http://www.yourdomain.com)'
 
 FEED_URI = 's3://dev.seanstoops.com/knotts/%(name)s.pickle'
+FEED_FORMAT = 'pickle'
 FEED_EXPORTERS_BASE = {
     'json': 'scrapy.contrib.exporter.JsonItemExporter',
     'jsonlines': 'scrapy.contrib.exporter.JsonLinesItemExporter',
