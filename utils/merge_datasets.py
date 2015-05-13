@@ -27,7 +27,7 @@ def get_forecast():
     return {x.time.date():x for x in forecast.daily().data}
 
 
-def save(f, filename):
+def s3_save(f, filename):
     conn = tinys3.Connection(
         S3_ACCESS_KEY,
         S3_SECRET_KEY,
@@ -35,26 +35,32 @@ def save(f, filename):
     f.seek(0)
     conn.upload('knotts/%s' % filename, f, S3_BUCKET)
     f.seek(0)
-    with open('../data/%s' % filename, 'w+') as fo:
-        shutil.copyfileobj(f, fo)
-    f.seek(0)
+
+
+def s3_open(filename):
+    conn = tinys3.Connection(
+        S3_ACCESS_KEY,
+        S3_SECRET_KEY,
+        endpoint=S3_ENDPOINT)
+    r = conn.get('knotts/%s' % filename, S3_BUCKET)
+    return StringIO(r.content)
 
 
 def load_pickles(filename):
     buff = []
-    with open(filename, 'rb') as f:
-        while True:
-            try:
-                buff.append(pickle.load(f))
-            except EOFError, e:
-                break
+    f = s3_open(filename)
+    while True:
+        try:
+            buff.append(pickle.load(f))
+        except EOFError, e:
+            break
     return buff
 
 
 def main():
-    park_hours = load_pickles('../data/parkhours.pickle')
-    soak_city_hours = load_pickles('../data/soakcityhours.pickle')
-    show_times = load_pickles('../data/showtimes.pickle')
+    park_hours = load_pickles('knottshours.pickle')
+    soak_city_hours = load_pickles('soakcityhours.pickle')
+    show_times = load_pickles('showtimes.pickle')
     knotts_spreadsheet = petl.fromcsv(
         'https://spreadsheets.google.com/tq?key=%s&gid=0&tqx=out:csv' % 
             KNOTTS_SPREADSHEET_KEY
@@ -120,7 +126,7 @@ def main():
 
     f = StringIO()
     pickle.dump(new_park_hours, f)
-    save(f, 'merged_data.pickle')
+    s3_save(f, 'merged_data.pickle')
 
 
 if __name__ == '__main__':
