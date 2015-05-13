@@ -17,6 +17,14 @@ NEWSPIDER_MODULE = 'knotts_scraper.spiders'
 #USER_AGENT = 'knotts_scraper (+http://www.yourdomain.com)'
 
 FEED_URI = 's3://dev.seanstoops.com/knotts/%(name)s.pickle'
+FEED_EXPORTERS_BASE = {
+    'json': 'scrapy.contrib.exporter.JsonItemExporter',
+    'jsonlines': 'scrapy.contrib.exporter.JsonLinesItemExporter',
+    'csv': 'scrapy.contrib.exporter.CsvItemExporter',
+    'xml': 'scrapy.contrib.exporter.XmlItemExporter',
+    'marshal': 'scrapy.contrib.exporter.MarshalItemExporter',
+    'pickle': 'scrapy.contrib.exporter.PickleItemExporter'
+}
 
 
 # The following fixes a bug where boto fails to load buckets with dots
