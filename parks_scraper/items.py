@@ -16,6 +16,7 @@ class ShowtimeItem(scrapy.Item):
 
 
 class ParkHours(scrapy.Item):
+	park = scrapy.Field()
 	date = scrapy.Field()
 	open_time = scrapy.Field()
 	close_time = scrapy.Field()
