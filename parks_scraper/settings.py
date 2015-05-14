@@ -8,10 +8,10 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
 
-BOT_NAME = 'knotts_scraper'
+BOT_NAME = 'parks_scraper'
 
-SPIDER_MODULES = ['knotts_scraper.spiders']
-NEWSPIDER_MODULE = 'knotts_scraper.spiders'
+SPIDER_MODULES = ['parks_scraper.spiders']
+NEWSPIDER_MODULE = 'parks_scraper.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'knotts_scraper (+http://www.yourdomain.com)'
@@ -33,7 +33,7 @@ FEED_EXPORTERS_BASE = {
 
 import ssl
 
-_old_match_hostname = ssl.match_hostname
+# _old_match_hostname = ssl.match_hostname
 
 def _new_match_hostname(cert, hostname):
    if hostname.endswith('.s3.amazonaws.com'):

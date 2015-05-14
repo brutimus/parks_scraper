@@ -3,7 +3,7 @@ import scrapy
 from scrapy.selector import Selector
 from dateutil.parser import parse as du_parse
 
-from knotts_scraper.items import ParkHours
+from parks_scraper.items import ParkHours
 
 
 class KnottsParkhoursSpider(scrapy.Spider):

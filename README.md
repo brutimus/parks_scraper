@@ -1,6 +1,12 @@
-# Knott's Berry Farm Scraper
+# Amusement Parks Scraper
 
-This is a Python Scrapy project to build a daily schedule for Knott's Berry Farm.
+This is a Python Scrapy project to retrieve schedule and show information
+for amusement parks.
+
+## Supported parks
+
+ - Knott's Berry Farm
+ - Disneyland
 
 ## Data sources
 

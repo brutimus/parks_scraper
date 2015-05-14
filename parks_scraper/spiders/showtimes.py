@@ -7,7 +7,7 @@ import string
 from daterangeparser import parse as dr_parse
 from dateutil.parser import parse as du_parse
 
-from knotts_scraper.items import ShowtimeItem
+from parks_scraper.items import ShowtimeItem
 
 
 DOW = (
@@ -21,8 +21,8 @@ DOW = (
 )
 
 
-class ShowtimesSpider(scrapy.Spider):
-    name = "showtimes"
+class KnottsShowtimesSpider(scrapy.Spider):
+    name = "knottsshowtimes"
     allowed_domains = ["knotts.com"]
     start_urls = (
         'http://www.knotts.com/plan-a-visit/show-times',

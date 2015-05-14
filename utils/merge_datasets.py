@@ -4,6 +4,7 @@ import forecastio
 import os
 import pickle
 import petl
+import requests
 import tinys3
 import shutil
 from StringIO import StringIO
@@ -15,6 +16,7 @@ S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY')
 S3_SECRET_KEY = os.environ.get('S3_SECRET_KEY')
 S3_BUCKET = os.environ.get('S3_BUCKET')
 S3_ENDPOINT = os.environ.get('S3_ENDPOINT')
+S3_CDN = os.environ.get('S3_CDN')
 
 
 KNOTTS_LAT = 33.844317
@@ -38,11 +40,7 @@ def s3_save(f, filename):
 
 
 def s3_open(filename):
-    conn = tinys3.Connection(
-        S3_ACCESS_KEY,
-        S3_SECRET_KEY,
-        endpoint=S3_ENDPOINT)
-    r = conn.get('knotts/%s' % filename, S3_BUCKET)
+    r = requests.get('http://%s/knotts/%s' % (S3_CDN, filename))
     return StringIO(r.content)
 
 
