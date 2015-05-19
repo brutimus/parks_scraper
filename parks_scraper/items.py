@@ -20,3 +20,10 @@ class ParkHours(scrapy.Item):
 	date = scrapy.Field()
 	open_time = scrapy.Field()
 	close_time = scrapy.Field()
+
+class ParkPass(scrapy.Item):
+	date = scrapy.Field()
+	premium = scrapy.Field()
+	deluxe = scrapy.Field()
+	socal = scrapy.Field()
+	socal_select = scrapy.Field()
