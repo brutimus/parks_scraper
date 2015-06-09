@@ -185,9 +185,6 @@ class DisneylandEventsSpider(scrapy.Spider):
                         content_type_buffer.append((name, times))
                     schedule_content[content_type] = content_type_buffer
 
-
-
-
                 yield DisneyDay(
                     park=park,
                     date=date,

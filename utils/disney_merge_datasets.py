@@ -26,7 +26,8 @@ DISNEY_LNG = -117.921971
 def get_forecast():
     forecast = forecastio.load_forecast(
         FORECAST_IO_API_KEY, DISNEY_LAT, DISNEY_LNG)
-    return {x.time.replace(hour=0, minute=0, second=0, microsecond=0):x.d for x in forecast.daily().data}
+    return {x.time.replace(hour=0, minute=0, second=0, microsecond=0):
+        x.d for x in forecast.daily().data}
 
 
 def s3_save(f, filename):
@@ -35,7 +36,7 @@ def s3_save(f, filename):
         S3_SECRET_KEY,
         endpoint=S3_ENDPOINT)
     f.seek(0)
-    conn.upload('parks/disneyland-%s' % filename, f, S3_BUCKET)
+    conn.upload('parks/%s' % filename, f, S3_BUCKET)
     f.seek(0)
 
 
@@ -73,14 +74,19 @@ def main():
         events_lookup[item['date']] = buff
 
     for item in spreadsheet.dicts():
-        # SPLIT UP THE DATA HERE INTO BOTH PARKS
         sheet_date = du_parse(item['date'])
         if events_lookup.has_key(sheet_date):
-            events_lookup[sheet_date].update({
-                'crowd_level': item['crowd_level'],
-                'closures': [
-                    x for x in map(unicode.strip, item['closures'].split(',')) if x]
-            })
+            e = events_lookup[sheet_date]
+            e['disneyland']['crowd_level'] = item['disneyland_crowd_level']
+            e['disneyland']['closures'] = [x for x in map(
+                unicode.strip,
+                item['disneyland_closures'].split(',')) if x]
+            e['disney-california-adventure']['crowd_level'] = \
+                item['california_adventure_crowd_level']
+            e['disney-california-adventure']['closures'] = \
+                [x for x in map(
+                    unicode.strip,
+                    item['california_adventure_closures'].split(',')) if x]
 
     for item in hours:
         if events_lookup.has_key(item['date']):
@@ -92,12 +98,15 @@ def main():
 
     for date, item in forecast.items():
         if events_lookup.has_key(date):
-            print item
             events_lookup[date]['forecast'] = item
 
     f = StringIO()
+    from pprint import pprint
+    pprint(events_lookup)
     pickle.dump(sorted(events_lookup.values(), key=lambda x:x['date']), f)
-    s3_save(f, 'merged_data.pickle')
+    s3_save(f, 'disneyland-merged_data.pickle')
+    f.seek(0)
+    s3_save(f, 'disney-california-adventure-merged_data.pickle')
 
 
 if __name__ == '__main__':
