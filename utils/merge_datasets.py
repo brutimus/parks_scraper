@@ -35,12 +35,12 @@ def s3_save(f, filename):
         S3_SECRET_KEY,
         endpoint=S3_ENDPOINT)
     f.seek(0)
-    conn.upload('knotts/%s' % filename, f, S3_BUCKET)
+    conn.upload('parks/knotts-%s' % filename, f, S3_BUCKET)
     f.seek(0)
 
 
 def s3_open(filename):
-    r = requests.get('http://%s/knotts/%s' % (S3_CDN, filename))
+    r = requests.get('http://%s/parks/%s' % (S3_CDN, filename))
     return StringIO(r.content)
 
 
@@ -56,9 +56,9 @@ def load_pickles(filename):
 
 
 def main():
-    park_hours = load_pickles('knottshours.pickle')
-    soak_city_hours = load_pickles('soakcityhours.pickle')
-    show_times = load_pickles('showtimes.pickle')
+    park_hours = load_pickles('knotts-hours.pickle')
+    soak_city_hours = load_pickles('soakcity-hours.pickle')
+    show_times = load_pickles('knotts-showtimes.pickle')
     knotts_spreadsheet = petl.fromcsv(
         'https://spreadsheets.google.com/tq?key=%s&gid=0&tqx=out:csv' % 
             KNOTTS_SPREADSHEET_KEY
@@ -96,8 +96,8 @@ def main():
     soak_city_hours_lookup = {}
     for item in soak_city_hours:
         soak_city_hours_lookup[item['date']] = {
-            'open_time': item['open_time'],
-            'close_time': item['close_time']
+            'open_time': item.get('open_time'),
+            'close_time': item.get('close_time')
         }
 
     new_park_hours = []

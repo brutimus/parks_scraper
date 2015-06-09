@@ -22,7 +22,7 @@ DOW = (
 
 
 class KnottsShowtimesSpider(scrapy.Spider):
-    name = "knottsshowtimes"
+    name = "knotts-showtimes"
     allowed_domains = ["knotts.com"]
     start_urls = (
         'http://www.knotts.com/plan-a-visit/show-times',
@@ -70,7 +70,11 @@ class KnottsShowtimesSpider(scrapy.Spider):
     def process_datetimes(self, string, date_choices):
         self.log('Processing datetimes: %s' % string)
         s = string.replace(u'–', u'-')
-        if '(' in s:
+        location = None
+        if 'Location' in s:
+            times, location = re.findall(r'([\w,:;&. ]+)\(Location: ([\w\-,& .]+)\)', s)[0]
+            dates = [x for x in date_choices if x is not None]
+        elif '(' in s:
             times, dates = re.findall(r'([\w,:;&. ]+)\(([\w\-,& .]+)\)', s)[0]
             dates = self.process_dates(dates, date_choices)
         else:
@@ -83,7 +87,7 @@ class KnottsShowtimesSpider(scrapy.Spider):
             and x or (x + ' p.m.') for x in times if x]
         times = map(lambda x:du_parse(x).time(), times)
         self.log('Processed times: %s' % times)
-        return ((x, times) for x in dates)
+        return ((x, times) for x in dates), location
 
 
     def parse(self, response):
@@ -101,7 +105,9 @@ class KnottsShowtimesSpider(scrapy.Spider):
                 for line_item in reversed(event_cell.xpath('text()').extract()):
                     line_item = line_item.strip()
                     if re.match(r'^\d.+', line_item):
-                        datetimes = self.process_datetimes(line_item, date_choices)
+                        datetimes, location = self.process_datetimes(line_item, date_choices)
+                        if location:
+                            location_cache = location
                         for dt in datetimes:
                             yield ShowtimeItem(
                                 name=name,

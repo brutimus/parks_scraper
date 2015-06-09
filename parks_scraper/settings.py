@@ -13,10 +13,13 @@ BOT_NAME = 'parks_scraper'
 SPIDER_MODULES = ['parks_scraper.spiders']
 NEWSPIDER_MODULE = 'parks_scraper.spiders'
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'knotts_scraper (+http://www.yourdomain.com)'
+# CONCURRENT_REQUESTS = 1
+DOWNLOAD_DELAY = 1
 
-FEED_URI = 's3://dev.seanstoops.com/knotts/%(name)s.pickle'
+# Crawl responsibly by identifying yourself (and your website) on the user-agent
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.65 Safari/537.36'
+
+FEED_URI = 's3://dev.seanstoops.com/parks/%(name)s.pickle'
 FEED_FORMAT = 'pickle'
 FEED_EXPORTERS_BASE = {
     'json': 'scrapy.contrib.exporter.JsonItemExporter',
@@ -26,6 +29,14 @@ FEED_EXPORTERS_BASE = {
     'marshal': 'scrapy.contrib.exporter.MarshalItemExporter',
     'pickle': 'scrapy.contrib.exporter.PickleItemExporter'
 }
+
+SPLASH_URL = 'http://192.168.59.103:8050'
+
+DOWNLOADER_MIDDLEWARES = {
+    'parks_scraper.scrapyjsmiddleware.SplashMiddleware': 725,
+}
+
+DUPEFILTER_CLASS = 'parks_scraper.scrapyjsdupefilter.SplashAwareDupeFilter'
 
 
 # The following fixes a bug where boto fails to load buckets with dots

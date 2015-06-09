@@ -7,7 +7,7 @@ from parks_scraper.items import ParkHours
 
 
 class KnottsParkhoursSpider(scrapy.Spider):
-    name = "knottshours"
+    name = "knotts-hours"
     park_name = "knotts"
     allowed_domains = ["knotts.com"]
     start_urls = (
@@ -25,7 +25,12 @@ class KnottsParkhoursSpider(scrapy.Spider):
                 if not time_range_selection:
                     continue
                 self.log('Time range: %s' % time_range_selection[0])
-                start, end = time_range_selection[0].split('-')
+                if time_range_selection[0] == 'Closed':
+                    yield ParkHours(
+                    park=self.park_name,
+                    date=start_date.date())
+                    continue    
+                start, end = time_range_selection[0].replace('Midnight', '12AM').split('-')
                 start_date = du_parse('%s %s' % (date_string, start))
                 end_date = du_parse('%s %s' % (date_string, end))
                 yield ParkHours(
@@ -36,7 +41,7 @@ class KnottsParkhoursSpider(scrapy.Spider):
 
 
 class SoakcityParkhoursSpider(KnottsParkhoursSpider):
-    name = "soakcityhours"
+    name = "soakcity-hours"
     park_name = "soakcity"
     allowed_domains = ["soakcityoc.com"]
     start_urls = (
