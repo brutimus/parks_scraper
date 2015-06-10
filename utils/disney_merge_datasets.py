@@ -68,13 +68,13 @@ def main():
 
     events_lookup = {}
     for item in events:
-        buff = events_lookup.get(item['date'], {})
+        buff = events_lookup.get(item['date'].date(), {})
         buff[item['park']] = item
         buff['date'] = item['date'].date()
-        events_lookup[item['date']] = buff
+        events_lookup[item['date'].date()] = buff
 
     for item in spreadsheet.dicts():
-        sheet_date = du_parse(item['date'])
+        sheet_date = du_parse(item['date']).date()
         if events_lookup.has_key(sheet_date):
             e = events_lookup[sheet_date]
             e['disneyland']['crowd_level'] = item['disneyland_crowd_level']
@@ -89,16 +89,17 @@ def main():
                     item['california_adventure_closures'].split(',')) if x]
 
     for item in hours:
-        if events_lookup.has_key(item['date']):
-            events_lookup[item['date']][item['park']]['hours'] = item
+        if events_lookup.has_key(item['date'].date()):
+            events_lookup[item['date'].date()][item['park']]['hours'] = item
 
     for item in passes:
+        print item
         if events_lookup.has_key(item['date']):
             events_lookup[item['date']]['passes'] = item
 
     for date, item in forecast.items():
-        if events_lookup.has_key(date):
-            events_lookup[date]['forecast'] = item
+        if events_lookup.has_key(date.date()):
+            events_lookup[date.date()]['forecast'] = item
 
     f = StringIO()
     from pprint import pprint
