@@ -9,17 +9,6 @@ import requests
 import tinys3
 import shutil
 from StringIO import StringIO
-import ssl
-
-# _old_match_hostname = ssl.match_hostname
-
-def _new_match_hostname(cert, hostname):
-   if hostname.endswith('.s3.amazonaws.com'):
-      pos = hostname.find('.s3.amazonaws.com')
-      hostname = hostname[:pos].replace('.', '') + hostname[pos:]
-   return _old_match_hostname(cert, hostname)
-
-ssl.match_hostname = _new_match_hostname
 
 
 FORECAST_IO_API_KEY = os.environ.get('FORECAST_IO_API_KEY')
