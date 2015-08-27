@@ -35,12 +35,14 @@ def s3_save(f, filename):
         S3_SECRET_KEY,
         endpoint=S3_ENDPOINT)
     f.seek(0)
+    conn.upload('knotts/%s' % filename, f, S3_BUCKET)
+    f.seek(0)
     conn.upload('parks/knotts-%s' % filename, f, S3_BUCKET)
     f.seek(0)
 
 
 def s3_open(filename):
-    r = requests.get('http://%s/parks/%s' % (S3_CDN, filename))
+    r = requests.get('http://%s/parks/%s' % (S3_BUCKET, filename))
     return StringIO(r.content)
 
 

@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import datetime
 from dateutil.parser import parse as du_parse
+import os
+import pickle
 import re
+import requests
 import scrapy
 from scrapy.http import Request
+from StringIO import StringIO
 import time
 import urlparse
 
@@ -14,6 +18,29 @@ park_name_lookup = {
     'Disneyland Park': 'disneyland',
     'Disney California Adventure Park': 'disney-california-adventure'
 }
+
+FORECAST_IO_API_KEY = os.environ.get('FORECAST_IO_API_KEY')
+DISNEY_SPREADSHEET_KEY = os.environ.get('DISNEY_SPREADSHEET_KEY')
+S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY')
+S3_SECRET_KEY = os.environ.get('S3_SECRET_KEY')
+S3_BUCKET = os.environ.get('S3_BUCKET')
+S3_ENDPOINT = os.environ.get('S3_ENDPOINT')
+S3_CDN = os.environ.get('S3_CDN')
+
+def s3_open(filename):
+    r = requests.get('http://%s/parks/%s' % (S3_BUCKET, filename))
+    return StringIO(r.content)
+
+
+def load_pickles(filename):
+    buff = []
+    f = s3_open(filename)
+    while True:
+        try:
+            buff.append(pickle.load(f))
+        except EOFError, e:
+            break
+    return buff
 
 
 class DisneylandHoursSpider(scrapy.Spider):
@@ -121,13 +148,21 @@ class DisneylandEventsSpider(scrapy.Spider):
         ('park_atmosphere', 'park-atmosphere-entertainment'))
 
     def start_requests(self):
+
+        self.done_events = list(load_pickles('disneyland-events.pickle'))
+        self.done_dates = set([x['date'].date() for x in self.done_events])
+        self.done_events_done = False
+
         for delta in range(self.days_to_scrape):
             dt = datetime.date.today() + datetime.timedelta(delta)
+            if dt in self.done_dates:
+                self.log('Date already found in pickle: %s' % dt)
+                continue
             yield Request(self.start_urls[0] % dt.strftime('%Y-%m-%d'), self.parse, meta={
                 'splash': {
                     'args': {
                         'html': 1,
-                        'wait': 5
+                        'wait': 10
                     },
                     'endpoint': 'render.html',  # optional; default is render.json
                     'slot_policy': 'scrapyjs.SlotPolicy.SINGLE_SLOT'
@@ -143,6 +178,22 @@ class DisneylandEventsSpider(scrapy.Spider):
         return dt
 
     def parse(self, response):
+
+        if self.done_events_done == False:
+            self.done_events_done = True
+            for e in self.done_events:
+                yield DisneyDay(
+                    date = e['date'],
+                    park = e['park'],
+                    open_time = e['open_time'],
+                    close_time = e['close_time'],
+                    parades = e['parades'],
+                    night_shows = e['night_shows'],
+                    events = e['events'],
+                    shows = e['shows'],
+                    park_atmosphere = e['park_atmosphere']
+                )
+
         self.log(str(response.meta['_splash_processed']['args']['url'])+ ' - ' + str(len(response.css('.parades'))))
         if len(response.css('.parades')) == 0:
             self.log('Page did not load properly, resending...')

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from dateutil.parser import parse as du_parse
+import boto
 import forecastio
 import os
 import pickle
@@ -28,20 +29,18 @@ def get_forecast():
         FORECAST_IO_API_KEY, DISNEY_LAT, DISNEY_LNG)
     return {x.time.replace(hour=0, minute=0, second=0, microsecond=0):
         x.d for x in forecast.daily().data}
-
+        
 
 def s3_save(f, filename):
-    conn = tinys3.Connection(
-        S3_ACCESS_KEY,
-        S3_SECRET_KEY,
-        endpoint=S3_ENDPOINT)
+    s3 = boto.connect_s3()
+    bucket = s3.get_bucket(S3_BUCKET)
+    key = bucket.new_key('parks/%s' % filename)
     f.seek(0)
-    conn.upload('parks/%s' % filename, f, S3_BUCKET)
+    key.set_contents_from_file(f)
     f.seek(0)
-
 
 def s3_open(filename):
-    r = requests.get('http://%s/parks/%s' % (S3_CDN, filename))
+    r = requests.get('http://%s/parks/%s' % (S3_BUCKET, filename))
     return StringIO(r.content)
 
 
@@ -74,6 +73,7 @@ def main():
         events_lookup[item['date'].date()] = buff
 
     for item in spreadsheet.dicts():
+        # print item
         sheet_date = du_parse(item['date']).date()
         if events_lookup.has_key(sheet_date):
             e = events_lookup[sheet_date]
@@ -93,7 +93,7 @@ def main():
             events_lookup[item['date'].date()][item['park']]['hours'] = item
 
     for item in passes:
-        print item
+        # print item
         if events_lookup.has_key(item['date']):
             events_lookup[item['date']]['passes'] = item
 

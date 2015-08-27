@@ -13,7 +13,7 @@ from parks_scraper.items import ShowtimeItem
 DOW = (
     'Sun',
     'Mon',
-    'Tue',
+    'Tues',
     'Wed',
     'Thurs',
     'Fri',
@@ -69,7 +69,7 @@ class KnottsShowtimesSpider(scrapy.Spider):
 
     def process_datetimes(self, string, date_choices):
         self.log('Processing datetimes: %s' % string)
-        s = string.replace(u'–', u'-')
+        s = string.replace(u'–', u'-').replace(u'\xa0', ' ').replace(u'\xc2', u' ')
         location = None
         if 'Location' in s:
             times, location = re.findall(r'([\w,:;&. ]+)\(Location: ([\w\-,& .]+)\)', s)[0]
@@ -81,8 +81,10 @@ class KnottsShowtimesSpider(scrapy.Spider):
             times = re.findall(r'([\w,:;&. ]+)', s)[0]
             dates = [x for x in date_choices if x is not None]
         self.log('Processed dates: %s' % dates)
+        self.log('Processing times: %s' % times)
         times = re.split('[,;&]', times)
-        times = map(unicode.strip, times)
+        times = map(lambda x:x.strip(), times)
+        times = filter(lambda x:x, times)
         times = [(x.endswith('m.') or x.endswith('m'))
             and x or (x + ' p.m.') for x in times if x]
         times = map(lambda x:du_parse(x).time(), times)
