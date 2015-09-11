@@ -44,12 +44,13 @@ DUPEFILTER_CLASS = 'parks_scraper.scrapyjsdupefilter.SplashAwareDupeFilter'
 
 import ssl
 
-_old_match_hostname = ssl.match_hostname
+if hasattr(ssl, 'match_hostname'):
+  _old_match_hostname = ssl.match_hostname
 
-def _new_match_hostname(cert, hostname):
-   if hostname.endswith('.s3.amazonaws.com'):
-      pos = hostname.find('.s3.amazonaws.com')
-      hostname = hostname[:pos].replace('.', '') + hostname[pos:]
-   return _old_match_hostname(cert, hostname)
+  def _new_match_hostname(cert, hostname):
+     if hostname.endswith('.s3.amazonaws.com'):
+        pos = hostname.find('.s3.amazonaws.com')
+        hostname = hostname[:pos].replace('.', '') + hostname[pos:]
+     return _old_match_hostname(cert, hostname)
 
-ssl.match_hostname = _new_match_hostname
+  ssl.match_hostname = _new_match_hostname

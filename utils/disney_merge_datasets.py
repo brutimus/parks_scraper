@@ -11,6 +11,23 @@ import shutil
 from StringIO import StringIO
 
 
+# The following fixes a bug where boto fails to load buckets with dots
+# https://github.com/boto/boto/issues/2836#issuecomment-68682573
+
+import ssl
+
+if hasattr(ssl, 'match_hostname'):
+  _old_match_hostname = ssl.match_hostname
+
+  def _new_match_hostname(cert, hostname):
+     if hostname.endswith('.s3.amazonaws.com'):
+        pos = hostname.find('.s3.amazonaws.com')
+        hostname = hostname[:pos].replace('.', '') + hostname[pos:]
+     return _old_match_hostname(cert, hostname)
+
+  ssl.match_hostname = _new_match_hostname
+
+
 FORECAST_IO_API_KEY = os.environ.get('FORECAST_IO_API_KEY')
 DISNEY_SPREADSHEET_KEY = os.environ.get('DISNEY_SPREADSHEET_KEY')
 S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY')
