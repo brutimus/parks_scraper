@@ -13,7 +13,6 @@ for amusement parks.
  - [Park Hours](https://www.knotts.com/hours-directions/park-hours)
  - [Events Schedule](https://www.knotts.com/plan-a-visit/show-times)
  - [Ride Closures](https://www.knotts.com/hours-directions/park-hours) (left rail)
- 
  - This also pulls some additional data from a proprietary Google Spreadsheet
 
 ### Disney
