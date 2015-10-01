@@ -182,17 +182,18 @@ class DisneylandEventsSpider(scrapy.Spider):
         if self.done_events_done == False:
             self.done_events_done = True
             for e in self.done_events:
-                yield DisneyDay(
-                    date = e['date'],
-                    park = e['park'],
-                    open_time = e['open_time'],
-                    close_time = e['close_time'],
-                    parades = e['parades'],
-                    night_shows = e['night_shows'],
-                    events = e['events'],
-                    shows = e['shows'],
-                    park_atmosphere = e['park_atmosphere']
-                )
+                if e['date'].date() >= datetime.date.today():
+                    yield DisneyDay(
+                        date = e['date'],
+                        park = e['park'],
+                        open_time = e['open_time'],
+                        close_time = e['close_time'],
+                        parades = e['parades'],
+                        night_shows = e['night_shows'],
+                        events = e['events'],
+                        shows = e['shows'],
+                        park_atmosphere = e['park_atmosphere']
+                    )
 
         self.log(str(response.meta['_splash_processed']['args']['url'])+ ' - ' + str(len(response.css('.parades'))))
         if len(response.css('.parades')) == 0:
